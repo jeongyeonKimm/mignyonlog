@@ -3,14 +3,12 @@ package com.mignyon.mignyonlog.api.service.post;
 import com.mignyon.mignyonlog.domain.post.Post;
 import com.mignyon.mignyonlog.domain.post.PostRepository;
 import com.mignyon.mignyonlog.domain.user.User;
-import org.assertj.core.api.Assertions;
+import com.mignyon.mignyonlog.domain.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -23,6 +21,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private PostRepository postRepository;
