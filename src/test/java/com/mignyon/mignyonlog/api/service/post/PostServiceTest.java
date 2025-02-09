@@ -14,10 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
@@ -59,5 +60,21 @@ class PostServiceTest {
         assertThat(savedPost.getUser().getName()).isEqualTo("mignyon");
 
         verify(postRepository, times(1)).save(any(Post.class));
+    }
+
+    @DisplayName("존재하지 않는 유저는 게시글 저장에 실패한다.")
+    @Test
+    void createPostWithInvalidUser() {
+        // given
+        given(userRepository.findById(999L)).willReturn(Optional.empty());
+
+        // when
+        assertThatThrownBy(() -> postService.createPost(999L, "장꾸를 소개합니다", "장꾸는 바보~", "12345"))
+                .isInstanceOf(PostException.class)
+                .hasMessage("존재하지 않는 유저입니다.");
+
+        // then
+        then(userRepository).should(times(1)).findById(999L);
+        then(postRepository).should(never()).save(any(Post.class));
     }
 }
