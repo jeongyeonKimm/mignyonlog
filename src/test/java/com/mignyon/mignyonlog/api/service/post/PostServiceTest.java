@@ -1,5 +1,7 @@
 package com.mignyon.mignyonlog.api.service.post;
 
+import com.mignyon.mignyonlog.api.service.post.request.PostCreateServiceRequest;
+import com.mignyon.mignyonlog.api.service.post.response.PostResponse;
 import com.mignyon.mignyonlog.domain.post.Post;
 import com.mignyon.mignyonlog.domain.post.PostRepository;
 import com.mignyon.mignyonlog.domain.user.User;
@@ -49,11 +51,18 @@ class PostServiceTest {
                 .user(user)
                 .build();
 
+        final PostCreateServiceRequest request = PostCreateServiceRequest.builder()
+                .userId(1L)
+                .title("장꾸를 소개합니다")
+                .content("장꾸는 바보~")
+                .password("12345")
+                .build();
+
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(postRepository.save(any(Post.class))).willReturn(post);
 
         // when
-        Post savedPost = postService.createPost(1L, "장꾸를 소개합니다", "장꾸는 바보~", "12345");
+        PostResponse savedPost = postService.createPost(request);
 
         // then
         assertThat(savedPost).isNotNull();
@@ -68,10 +77,17 @@ class PostServiceTest {
     @Test
     void createPostWithInvalidUser() {
         // given
+        final PostCreateServiceRequest request = PostCreateServiceRequest.builder()
+                .userId(999L)
+                .title("장꾸를 소개합니다")
+                .content("장꾸는 바보~")
+                .password("12345")
+                .build();
+
         given(userRepository.findById(999L)).willReturn(Optional.empty());
 
         // when
-        assertThatThrownBy(() -> postService.createPost(999L, "장꾸를 소개합니다", "장꾸는 바보~", "12345"))
+        assertThatThrownBy(() -> postService.createPost(request))
                 .isInstanceOf(RestApiException.class)
                 .hasMessage(UserErrorCode.INVALID_USER.getMessage());
 
