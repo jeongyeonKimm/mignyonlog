@@ -4,6 +4,8 @@ import com.mignyon.mignyonlog.domain.post.Post;
 import com.mignyon.mignyonlog.domain.post.PostRepository;
 import com.mignyon.mignyonlog.domain.user.User;
 import com.mignyon.mignyonlog.domain.user.UserRepository;
+import com.mignyon.mignyonlog.exception.RestApiException;
+import com.mignyon.mignyonlog.exception.UserErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,8 +72,8 @@ class PostServiceTest {
 
         // when
         assertThatThrownBy(() -> postService.createPost(999L, "장꾸를 소개합니다", "장꾸는 바보~", "12345"))
-                .isInstanceOf(PostException.class)
-                .hasMessage("존재하지 않는 유저입니다.");
+                .isInstanceOf(RestApiException.class)
+                .hasMessage(UserErrorCode.INVALID_USER.getMessage());
 
         // then
         then(userRepository).should(times(1)).findById(999L);
