@@ -27,7 +27,7 @@ public class ErrorResponse {
         private final String field;
         private final String message;
 
-        private ValidationError of(final FieldError fieldError) {
+        public static ValidationError of(final FieldError fieldError) {
             return ValidationError.builder()
                     .field(fieldError.getField())
                     .message(fieldError.getDefaultMessage())
