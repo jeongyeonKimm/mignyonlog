@@ -52,12 +52,11 @@ class PostControllerTest {
     @Test
     void createPost() throws Exception {
         // given
-        PostCreateRequest request = getPostCreateRequest();
+        PostCreateRequest request = getPostCreateRequest("장꾸꾸", "바보옹");
 
         // when
         mockMvc.perform(
                         post("/api/posts")
-                                .header(USER_ID_HEADER, 1L)
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -68,35 +67,15 @@ class PostControllerTest {
 
     }
 
-    @DisplayName("사용자 아이디가 헤더에 없으면 신규 게시글을 등록에 실패한다.")
-    @Test
-    void createPostWithoutHeader() throws Exception {
-        // given
-        PostCreateRequest request = getPostCreateRequest();
-
-        // when
-        mockMvc.perform(post("/api/posts")
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isBadRequest())
-                .andDo(print());
-    }
-
-    @DisplayName("신규 게시글을 등록시 제목은 필수값이다.")
+    @DisplayName("신규 게시글을 등록시 제목, 비밀번호는 필수값이다.")
     @ParameterizedTest
     @MethodSource("invalidPostCreateParameter")
-    void createPostWithoutTitle(String title, String content, String password, String expectedErrorField, String expectedErrorMessage) throws Exception {
+    void createPostWithoutTitle(String title, String password, String expectedErrorField, String expectedErrorMessage) throws Exception {
         // given
-        PostCreateRequest request = PostCreateRequest.builder()
-                .title(title)
-                .content(content)
-                .password(password)
-                .build();
+        PostCreateRequest request = getPostCreateRequest(title, password);
 
         // when
         mockMvc.perform(post("/api/posts")
-                        .header(USER_ID_HEADER, 1L)
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -108,18 +87,19 @@ class PostControllerTest {
                 .andDo(print());
     }
 
-    private PostCreateRequest getPostCreateRequest() {
+    private PostCreateRequest getPostCreateRequest(String title, String password) {
         return PostCreateRequest.builder()
-                .title("장꾸꾸")
+                .userId(1L)
+                .title(title)
                 .content("바보옹")
-                .password("12345")
+                .password(password)
                 .build();
     }
 
     private static Stream<Arguments> invalidPostCreateParameter() {
         return Stream.of(
-                Arguments.of(null, "바보옹", "12345", "title", "제목은 필수입니다."),
-                Arguments.of("장꾸꾸", "바보옹", null, "password", "비밀번호는 필수입니다.")
+                Arguments.of(null, "12345", "title", "제목은 필수입니다."),
+                Arguments.of("장꾸꾸", null, "password", "비밀번호는 필수입니다.")
         );
     }
 }

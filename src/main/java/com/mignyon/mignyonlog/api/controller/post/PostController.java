@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.mignyon.mignyonlog.common.constant.PostConstants.USER_ID_HEADER;
 
 @RequiredArgsConstructor
 @RestController
@@ -21,10 +18,9 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/api/posts")
-    public ResponseEntity<PostResponse> createPost(@RequestHeader(USER_ID_HEADER) Long userId,
-                                                   @RequestBody @Valid PostCreateRequest request) {
+    public ResponseEntity<PostResponse> createPost(@RequestBody @Valid PostCreateRequest request) {
 
-        PostResponse response = postService.createPost(request.toServiceRequest(userId));
+        PostResponse response = postService.createPost(request.toServiceRequest());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);

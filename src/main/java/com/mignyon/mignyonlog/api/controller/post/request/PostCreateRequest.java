@@ -2,11 +2,15 @@ package com.mignyon.mignyonlog.api.controller.post.request;
 
 import com.mignyon.mignyonlog.api.service.post.request.PostCreateServiceRequest;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class PostCreateRequest {
+
+    @NotNull
+    private Long userId;
 
     @NotBlank(message = "제목은 필수입니다.")
     private String title;
@@ -17,15 +21,16 @@ public class PostCreateRequest {
     private String password;
 
     @Builder
-    private PostCreateRequest(String title, String content, String password) {
+    private PostCreateRequest(Long userId, String title, String content, String password) {
+        this.userId = userId;
         this.title = title;
         this.content = content;
         this.password = password;
     }
 
-    public PostCreateServiceRequest toServiceRequest(Long userId) {
+    public PostCreateServiceRequest toServiceRequest() {
         return PostCreateServiceRequest.builder()
-                .userId(userId)
+                .userId(this.userId)
                 .title(this.title)
                 .content(this.content)
                 .password(this.password)
