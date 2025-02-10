@@ -8,12 +8,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.stream.Stream;
 
 import static com.mignyon.mignyonlog.common.constant.PostConstants.USER_ID_HEADER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -79,12 +84,14 @@ class PostControllerTest {
     }
 
     @DisplayName("신규 게시글을 등록시 제목은 필수값이다.")
-    @Test
-    void createPostWithoutTitle() throws Exception {
+    @ParameterizedTest
+    @MethodSource("invalidPostCreateParameter")
+    void createPostWithoutTitle(String title, String content, String password, String expectedErrorField, String expectedErrorMessage) throws Exception {
         // given
         PostCreateRequest request = PostCreateRequest.builder()
-                .content("바보옹")
-                .password("12345")
+                .title(title)
+                .content(content)
+                .password(password)
                 .build();
 
         // when
@@ -96,31 +103,8 @@ class PostControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
-                .andExpect(jsonPath("$.errors[0].field").value("title"))
-                .andExpect(jsonPath("$.errors[0].message").value("제목은 필수입니다."))
-                .andDo(print());
-    }
-
-    @DisplayName("신규 게시글을 등록시 비밀번호는 필수값이다.")
-    @Test
-    void createPostWithoutPassword() throws Exception {
-        // given
-        PostCreateRequest request = PostCreateRequest.builder()
-                .title("장꾸꾸")
-                .content("바보옹")
-                .build();
-
-        // when
-        mockMvc.perform(post("/api/posts")
-                        .header(USER_ID_HEADER, 1L)
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("400"))
-                .andExpect(jsonPath("$.message").value("BAD_REQUEST"))
-                .andExpect(jsonPath("$.errors[0].field").value("password"))
-                .andExpect(jsonPath("$.errors[0].message").value("비밀번호는 필수입니다."))
+                .andExpect(jsonPath("$.errors[0].field").value(expectedErrorField))
+                .andExpect(jsonPath("$.errors[0].message").value(expectedErrorMessage))
                 .andDo(print());
     }
 
@@ -130,5 +114,12 @@ class PostControllerTest {
                 .content("바보옹")
                 .password("12345")
                 .build();
+    }
+
+    private static Stream<Arguments> invalidPostCreateParameter() {
+        return Stream.of(
+                Arguments.of(null, "바보옹", "12345", "title", "제목은 필수입니다."),
+                Arguments.of("장꾸꾸", "바보옹", null, "password", "비밀번호는 필수입니다.")
+        );
     }
 }
